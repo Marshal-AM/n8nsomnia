@@ -3,6 +3,7 @@ const { ethers } = require('ethers');
 const solc = require('solc');
 const axios = require('axios');
 const FormData = require('form-data');
+const OpenAI = require('openai');
 require('dotenv').config();
 
 const app = express();
@@ -1864,6 +1865,102 @@ app.post('/airdrop', async (req, res) => {
       success: false,
       error: error.message,
       details: error.reason || error.code
+    });
+  }
+});
+
+// Initialize OpenAI client for token price fetching
+let openaiClient = null;
+if (process.env.OPENAI_API_KEY) {
+  openaiClient = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY
+  });
+}
+
+// System prompt for fetching token prices from natural language
+const PRICE_SYSTEM_PROMPT = `You are a cryptocurrency price data assistant. Your task is to understand natural language queries about cryptocurrency prices and fetch the current prices from the web.
+
+INSTRUCTIONS:
+1. Parse the user's natural language query to identify which cryptocurrencies they want prices for
+2. Understand queries like:
+   - "bitcoin price" → BTC
+   - "what's ethereum worth" → ETH
+   - "show me solana and cardano prices" → SOL, ADA
+   - "how much is dogecoin" → DOGE
+   - "prices for BTC, ETH, and BNB" → BTC, ETH, BNB
+   - "bitcoin ethereum solana" → BTC, ETH, SOL
+3. Search for the CURRENT/LIVE price of each identified token
+4. Return prices in USD
+5. Provide the price information in a clear and structured format
+6. Include price, 24h change percentage if available, and data source for each token
+7. Use reliable sources like CoinMarketCap, CoinGecko, or Binance
+
+Be accurate, understand the query intent, and use the most current prices available from authoritative sources.`;
+
+// Token price endpoint - fetch current token prices using natural language queries
+app.post('/token-price', async (req, res) => {
+  try {
+    const { query } = req.body;
+
+    // Validation
+    if (!query || typeof query !== 'string' || !query.trim()) {
+      return res.status(400).json({
+        success: false,
+        error: 'query is required and must be a non-empty string'
+      });
+    }
+
+    if (query.length > 500) {
+      return res.status(400).json({
+        success: false,
+        error: 'Query too long (max 500 characters)'
+      });
+    }
+
+    if (!openaiClient) {
+      return res.status(500).json({
+        success: false,
+        error: 'OPENAI_API_KEY not configured. Please set it in your .env file'
+      });
+    }
+
+    console.log(`🔍 Processing price query: ${query}`);
+
+    // Use OpenAI's web search model
+    const completion = await openaiClient.chat.completions.create({
+      model: 'gpt-4o-search-preview',
+      messages: [
+        {
+          role: 'system',
+          content: PRICE_SYSTEM_PROMPT
+        },
+        {
+          role: 'user',
+          content: query
+        }
+      ]
+    });
+
+    const response = completion.choices[0].message.content;
+    
+    // Log the raw response for debugging
+    console.log(`📄 Raw response from OpenAI:`, response.substring(0, 500)); // Log first 500 chars
+
+    // Return whatever OpenAI gives us
+    return res.json({
+      success: true,
+      query: query,
+      response: response,
+      timestamp: new Date().toISOString(),
+      model_used: 'gpt-4o-search-preview'
+    });
+
+  } catch (error) {
+    console.error('Token price error:', error);
+    return res.status(500).json({
+      success: false,
+      error: error.message || 'Error fetching token prices',
+      details: error.response?.data || error.code
     });
   }
 });
