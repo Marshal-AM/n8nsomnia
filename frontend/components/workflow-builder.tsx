@@ -3,6 +3,7 @@
 import type React from "react"
 
 import { useState, useCallback, useRef } from "react"
+import { useRouter } from "next/navigation"
 import ReactFlow, {
   ReactFlowProvider,
   Background,
@@ -21,7 +22,7 @@ import ReactFlow, {
 import "reactflow/dist/style.css"
 import { toast } from "@/components/ui/use-toast"
 import { Button } from "@/components/ui/button"
-import { Save, Upload, Play } from "lucide-react"
+import { Save, Upload, Play, ArrowLeft } from "lucide-react"
 import NodeLibrary from "./node-library"
 import NodeConfigPanel from "./node-config-panel"
 import CustomEdge from "./custom-edge"
@@ -32,6 +33,17 @@ import { ConditionalNode } from "./nodes/conditional-node"
 import { CodeNode } from "./nodes/code-node"
 import { generateNodeId, createNode } from "@/lib/workflow-utils"
 import type { WorkflowNode } from "@/lib/types"
+import { AIChatModal } from "./ai-chat-modal"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 const nodeTypes: NodeTypes = {
   input: InputNode,
@@ -46,11 +58,14 @@ const edgeTypes: EdgeTypes = {
 }
 
 export default function WorkflowBuilder() {
+  const router = useRouter()
   const reactFlowWrapper = useRef<HTMLDivElement>(null)
   const [nodes, setNodes, onNodesChange] = useNodesState([])
   const [edges, setEdges, onEdgesChange] = useEdgesState([])
   const [selectedNode, setSelectedNode] = useState<Node | null>(null)
   const [reactFlowInstance, setReactFlowInstance] = useState<any>(null)
+  const [isAIChatOpen, setIsAIChatOpen] = useState(false)
+  const [showExitDialog, setShowExitDialog] = useState(false)
 
   const onConnect = useCallback(
     (params: Edge | Connection) => setEdges((eds) => addEdge({ ...params, type: "custom" }, eds)),
@@ -198,6 +213,20 @@ export default function WorkflowBuilder() {
     }, 2000)
   }
 
+  const handleBackClick = () => {
+    const hasUnsavedChanges = nodes.length > 0 || edges.length > 0
+    if (hasUnsavedChanges) {
+      setShowExitDialog(true)
+    } else {
+      router.push("/my-agents")
+    }
+  }
+
+  const handleConfirmExit = () => {
+    setShowExitDialog(false)
+    router.push("/my-agents")
+  }
+
   return (
     <div className="flex h-screen">
       <div className="w-64 border-r border-gray-200 p-4 bg-gray-50">
@@ -229,6 +258,27 @@ export default function WorkflowBuilder() {
               <Background />
               <Controls />
               <MiniMap />
+              <Panel position="top-left">
+                <div className="flex gap-2">
+                  <Button
+                    onClick={handleBackClick}
+                    size="default"
+                    variant="outline"
+                    className="font-medium"
+                  >
+                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    Back
+                  </Button>
+                  <Button
+                    onClick={() => setIsAIChatOpen(true)}
+                    size="default"
+                    variant="default"
+                    className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg font-semibold"
+                  >
+                    Create with AI
+                  </Button>
+                </div>
+              </Panel>
               <Panel position="top-right">
                 <div className="flex gap-2">
                   <Button onClick={saveWorkflow} size="sm" variant="outline">
@@ -259,6 +309,28 @@ export default function WorkflowBuilder() {
           />
         </div>
       )}
+
+      <AIChatModal open={isAIChatOpen} onOpenChange={setIsAIChatOpen} />
+
+      <AlertDialog open={showExitDialog} onOpenChange={setShowExitDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Leave Agent Builder?</AlertDialogTitle>
+            <AlertDialogDescription>
+              You have unsaved changes in your workflow. If you leave now, all your progress will be lost. Are you sure you want to continue?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmExit}
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
+            >
+              Exit
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
