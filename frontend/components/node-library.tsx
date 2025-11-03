@@ -78,7 +78,7 @@ export default function NodeLibrary() {
         <Button
           key={node.type}
           variant="outline"
-          className={`justify-start text-left ${node.disabled ? "opacity-50 cursor-not-allowed" : ""}`}
+          className={`h-16 justify-start text-left ${node.disabled ? "opacity-50 cursor-not-allowed" : ""}`}
           draggable={!node.disabled}
           onDragStart={(e) => onDragStart(e, node.type)}
           disabled={node.disabled}
