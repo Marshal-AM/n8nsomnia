@@ -26,11 +26,7 @@ import { Save, Upload, Play, ArrowLeft } from "lucide-react"
 import NodeLibrary from "./node-library"
 import NodeConfigPanel from "./node-config-panel"
 import CustomEdge from "./custom-edge"
-import { InputNode } from "./nodes/input-node"
-import { OutputNode } from "./nodes/output-node"
-import { ProcessNode } from "./nodes/process-node"
-import { ConditionalNode } from "./nodes/conditional-node"
-import { CodeNode } from "./nodes/code-node"
+import { ToolNode } from "./nodes/tool-node"
 import { generateNodeId, createNode } from "@/lib/workflow-utils"
 import type { WorkflowNode } from "@/lib/types"
 import { AIChatModal } from "./ai-chat-modal"
@@ -45,12 +41,30 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 
+const toolTypes = [
+  "transfer",
+  "swap",
+  "get_balance",
+  "deploy_erc20",
+  "deploy_erc721",
+  "create_dao",
+  "airdrop",
+  "fetch_price",
+  "deposit_yield",
+  "wallet_analytics",
+]
+
 const nodeTypes: NodeTypes = {
-  input: InputNode,
-  output: OutputNode,
-  process: ProcessNode,
-  conditional: ConditionalNode,
-  code: CodeNode,
+  transfer: ToolNode,
+  swap: ToolNode,
+  get_balance: ToolNode,
+  deploy_erc20: ToolNode,
+  deploy_erc721: ToolNode,
+  create_dao: ToolNode,
+  airdrop: ToolNode,
+  fetch_price: ToolNode,
+  deposit_yield: ToolNode,
+  wallet_analytics: ToolNode,
 }
 
 const edgeTypes: EdgeTypes = {
@@ -85,7 +99,7 @@ export default function WorkflowBuilder() {
       const type = event.dataTransfer.getData("application/reactflow")
 
       // Check if the dropped element is valid
-      if (typeof type === "undefined" || !type) {
+      if (typeof type === "undefined" || !type || !toolTypes.includes(type)) {
         return
       }
 
@@ -104,7 +118,7 @@ export default function WorkflowBuilder() {
         setNodes((nds) => nds.concat(newNode))
       }
     },
-    [reactFlowInstance, setNodes],
+    [reactFlowInstance, setNodes, toolTypes],
   )
 
   const onNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
@@ -139,7 +153,7 @@ export default function WorkflowBuilder() {
     if (nodes.length === 0) {
       toast({
         title: "Nothing to save",
-        description: "Add some nodes to your workflow first",
+        description: "Add some tools to your workflow first",
         variant: "destructive",
       })
       return
@@ -192,7 +206,7 @@ export default function WorkflowBuilder() {
     if (nodes.length === 0) {
       toast({
         title: "Nothing to execute",
-        description: "Add some nodes to your workflow first",
+        description: "Add some tools to your workflow first",
         variant: "destructive",
       })
       return
@@ -203,7 +217,7 @@ export default function WorkflowBuilder() {
       description: "Your workflow is being executed (simulation only in this MVP)",
     })
 
-    // In a real implementation, we would traverse the graph and execute each node
+    // In a real implementation, we would traverse the graph and execute each tool
     // For the MVP, we'll just simulate execution with a success message
     setTimeout(() => {
       toast({
@@ -230,7 +244,6 @@ export default function WorkflowBuilder() {
   return (
     <div className="flex h-screen">
       <div className="w-64 border-r border-gray-200 p-4 bg-gray-50">
-        <h2 className="text-lg font-semibold mb-4">Node Library</h2>
         <NodeLibrary />
       </div>
 

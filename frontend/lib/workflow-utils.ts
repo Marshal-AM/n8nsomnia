@@ -1,11 +1,11 @@
 import type { Node, XYPosition } from "reactflow"
 import type { NodeData } from "./types"
 
-let nodeIdCounter = 0
+let toolIdCounter = 0
 
 export const generateNodeId = (type: string): string => {
-  nodeIdCounter++
-  return `${type}-${nodeIdCounter}`
+  toolIdCounter++
+  return `${type}-${toolIdCounter}`
 }
 
 export const createNode = ({
@@ -17,98 +17,46 @@ export const createNode = ({
   position: XYPosition
   id: string
 }): Node<NodeData> => {
-  const baseNode = {
+  return {
     id,
     type,
     position,
     data: {
       label: getDefaultLabel(type),
       description: getDefaultDescription(type),
+      config: {},
     },
-  }
-
-  switch (type) {
-    case "input":
-      return {
-        ...baseNode,
-        data: {
-          ...baseNode.data,
-          dataSource: "manual",
-          sampleData: '{"example": "data"}',
-        },
-      }
-    case "output":
-      return {
-        ...baseNode,
-        data: {
-          ...baseNode.data,
-          outputType: "console",
-          outputFormat: "json",
-        },
-      }
-    case "process":
-      return {
-        ...baseNode,
-        data: {
-          ...baseNode.data,
-          processType: "transform",
-          processConfig: '{"operation": "map"}',
-        },
-      }
-    case "conditional":
-      return {
-        ...baseNode,
-        data: {
-          ...baseNode.data,
-          condition: "data.value > 0",
-          trueLabel: "Yes",
-          falseLabel: "No",
-        },
-      }
-    case "code":
-      return {
-        ...baseNode,
-        data: {
-          ...baseNode.data,
-          codeLanguage: "javascript",
-          code: "// Write your code here\nfunction process(data) {\n  // Transform data\n  return data;\n}",
-        },
-      }
-    default:
-      return baseNode
   }
 }
 
 const getDefaultLabel = (type: string): string => {
-  switch (type) {
-    case "input":
-      return "Input"
-    case "output":
-      return "Output"
-    case "process":
-      return "Process"
-    case "conditional":
-      return "Conditional"
-    case "code":
-      return "Code"
-    default:
-      return "Node"
+  const labels: Record<string, string> = {
+    transfer: "Transfer",
+    swap: "Swap",
+    get_balance: "Get Balance",
+    deploy_erc20: "Deploy ERC-20",
+    deploy_erc721: "Deploy ERC-721",
+    create_dao: "Create DAO",
+    airdrop: "Airdrop",
+    fetch_price: "Fetch Price",
+    deposit_yield: "Deposit Yield",
+    wallet_analytics: "Wallet Analytics",
   }
+  return labels[type] || "Tool"
 }
 
 const getDefaultDescription = (type: string): string => {
-  switch (type) {
-    case "input":
-      return "Data input node"
-    case "output":
-      return "Data output node"
-    case "process":
-      return "Data processing node"
-    case "conditional":
-      return "Conditional branching"
-    case "code":
-      return "Custom code execution"
-    default:
-      return "Workflow node"
+  const descriptions: Record<string, string> = {
+    transfer: "Transfer tokens or assets",
+    swap: "Swap tokens",
+    get_balance: "Get wallet balance",
+    deploy_erc20: "Deploy ERC-20 token",
+    deploy_erc721: "Deploy ERC-721 NFT",
+    create_dao: "Create a new DAO",
+    airdrop: "Airdrop tokens to addresses",
+    fetch_price: "Fetch token price",
+    deposit_yield: "Deposit to yield farming",
+    wallet_analytics: "Analyze wallet data",
   }
+  return descriptions[type] || "Workflow tool"
 }

@@ -3,94 +3,107 @@
 import type React from "react"
 
 import { Button } from "@/components/ui/button"
-import { Database, FileOutput, GitBranch, Code, Settings, Mail, Filter, Workflow, Table } from "lucide-react"
+import {
+  ArrowRightLeft,
+  RefreshCw,
+  Wallet,
+  Coins,
+  Image as ImageIcon,
+  Users,
+  Gift,
+  TrendingUp,
+  PiggyBank,
+  BarChart3,
+} from "lucide-react"
 
-const nodeTypes = [
+const toolTypes = [
   {
-    type: "input",
-    label: "Input",
-    description: "Data input node",
-    icon: <Database className="h-4 w-4 mr-2" />,
+    type: "transfer",
+    label: "Transfer",
+    description: "Transfer tokens or assets",
+    icon: <ArrowRightLeft className="h-4 w-4 mr-2" />,
   },
   {
-    type: "output",
-    label: "Output",
-    description: "Data output node",
-    icon: <FileOutput className="h-4 w-4 mr-2" />,
+    type: "swap",
+    label: "Swap",
+    description: "Swap tokens",
+    icon: <RefreshCw className="h-4 w-4 mr-2" />,
   },
   {
-    type: "process",
-    label: "Process",
-    description: "Data processing node",
-    icon: <Settings className="h-4 w-4 mr-2" />,
+    type: "get_balance",
+    label: "Get Balance",
+    description: "Get wallet balance",
+    icon: <Wallet className="h-4 w-4 mr-2" />,
   },
   {
-    type: "conditional",
-    label: "Conditional",
-    description: "Conditional branching",
-    icon: <GitBranch className="h-4 w-4 mr-2" />,
+    type: "deploy_erc20",
+    label: "Deploy ERC-20",
+    description: "Deploy ERC-20 token",
+    icon: <Coins className="h-4 w-4 mr-2" />,
   },
   {
-    type: "code",
-    label: "Code",
-    description: "Custom code execution",
-    icon: <Code className="h-4 w-4 mr-2" />,
+    type: "deploy_erc721",
+    label: "Deploy ERC-721",
+    description: "Deploy ERC-721 NFT",
+    icon: <ImageIcon className="h-4 w-4 mr-2" />,
   },
   {
-    type: "email",
-    label: "Email",
-    description: "Send email notification",
-    icon: <Mail className="h-4 w-4 mr-2" />,
-    disabled: true,
+    type: "create_dao",
+    label: "Create DAO",
+    description: "Create a new DAO",
+    icon: <Users className="h-4 w-4 mr-2" />,
   },
   {
-    type: "filter",
-    label: "Filter",
-    description: "Filter data",
-    icon: <Filter className="h-4 w-4 mr-2" />,
-    disabled: true,
+    type: "airdrop",
+    label: "Airdrop",
+    description: "Airdrop tokens to addresses",
+    icon: <Gift className="h-4 w-4 mr-2" />,
   },
   {
-    type: "workflow",
-    label: "Sub-workflow",
-    description: "Nested workflow",
-    icon: <Workflow className="h-4 w-4 mr-2" />,
-    disabled: true,
+    type: "fetch_price",
+    label: "Fetch Price",
+    description: "Fetch token price",
+    icon: <TrendingUp className="h-4 w-4 mr-2" />,
   },
   {
-    type: "table",
-    label: "Table",
-    description: "Database table operation",
-    icon: <Table className="h-4 w-4 mr-2" />,
-    disabled: true,
+    type: "deposit_yield",
+    label: "Deposit Yield",
+    description: "Deposit to yield farming",
+    icon: <PiggyBank className="h-4 w-4 mr-2" />,
+  },
+  {
+    type: "wallet_analytics",
+    label: "Wallet Analytics",
+    description: "Analyze wallet data",
+    icon: <BarChart3 className="h-4 w-4 mr-2" />,
   },
 ]
 
 export default function NodeLibrary() {
-  const onDragStart = (event: React.DragEvent<HTMLButtonElement>, nodeType: string) => {
-    event.dataTransfer.setData("application/reactflow", nodeType)
+  const onDragStart = (event: React.DragEvent<HTMLButtonElement>, toolType: string) => {
+    event.dataTransfer.setData("application/reactflow", toolType)
     event.dataTransfer.effectAllowed = "move"
   }
 
   return (
     <div className="flex flex-col gap-2">
-      {nodeTypes.map((node) => (
+      <h2 className="text-lg font-semibold mb-2">Tools</h2>
+      {toolTypes.map((tool) => (
         <Button
-          key={node.type}
+          key={tool.type}
           variant="outline"
-          className={`h-16 justify-start text-left ${node.disabled ? "opacity-50 cursor-not-allowed" : ""}`}
-          draggable={!node.disabled}
-          onDragStart={(e) => onDragStart(e, node.type)}
-          disabled={node.disabled}
+          className="h-16 justify-start text-left"
+          draggable={true}
+          onDragStart={(e) => onDragStart(e, tool.type)}
         >
-          {node.icon}
+          {tool.icon}
           <div className="flex flex-col items-start">
-            <span>{node.label}</span>
-            <span className="text-xs text-gray-500">{node.description}</span>
+            <span>{tool.label}</span>
+            <span className="text-xs text-gray-500">{tool.description}</span>
           </div>
         </Button>
       ))}
-      <div className="mt-4 text-xs text-gray-500">Drag and drop nodes onto the canvas to build your workflow</div>
+      <div className="mt-4 text-xs text-gray-500">Drag and drop tools onto the canvas to build your workflow</div>
     </div>
   )
 }
