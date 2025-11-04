@@ -28,13 +28,15 @@ export function AgentWallet() {
   const [isCreating, setIsCreating] = useState(false)
   const [isImporting, setIsImporting] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [newPrivateKey, setNewPrivateKey] = useState<string | null>(null)
   const [tokenBalances, setTokenBalances] = useState<{ somi: string; stt: string } | null>(null)
 
   useEffect(() => {
-    if (dbUser?.wallet_address) {
+    if (dbUser?.wallet_address && !newPrivateKey) {
+      // Only fetch balances if not showing private key (avoid re-render closing dialog)
       fetchBalances()
     }
-  }, [dbUser?.wallet_address])
+  }, [dbUser?.wallet_address, newPrivateKey])
 
   const fetchBalances = async () => {
     if (!dbUser?.wallet_address) return
@@ -60,19 +62,16 @@ export function AgentWallet() {
     try {
       const wallet = createWallet()
       await saveWalletToUser(user.id, wallet.address, wallet.privateKey)
-      await syncUser()
-      toast({
-        title: "Wallet created",
-        description: "Your agent wallet has been created successfully",
-      })
-      setShowCreateDialog(false)
+      setIsCreating(false)
+      setNewPrivateKey(wallet.privateKey)
+      // Don't call syncUser immediately - it causes re-render that closes dialog
+      // syncUser will be called when user closes the dialog or component remounts
     } catch (error: any) {
       toast({
         title: "Error creating wallet",
         description: error.message || "Failed to create wallet",
         variant: "destructive",
       })
-    } finally {
       setIsCreating(false)
     }
   }
@@ -157,48 +156,41 @@ export function AgentWallet() {
   return (
     <Card className="w-full">
       <CardHeader className="pb-3">
-        <CardTitle className="text-lg flex items-center gap-2">
-          <Wallet className="h-4 w-4" />
-          Agent Wallet
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="pt-0">
-        {dbUser?.wallet_address ? (
-          <div className="flex items-center gap-6">
-            <div className="flex-1">
-              <Label className="text-xs text-muted-foreground mb-1 block">Wallet Address</Label>
-              <div className="flex items-center gap-2">
-                <span className="font-mono text-sm text-foreground">
-                  {dbUser.wallet_address.slice(0, 6)}...{dbUser.wallet_address.slice(-4)}
-                </span>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-6 w-6"
-                  onClick={copyAddress}
-                  title="Copy address"
-                >
-                  {copied ? (
-                    <Check className="h-3 w-3 text-green-500" />
-                  ) : (
-                    <Copy className="h-3 w-3" />
-                  )}
-                </Button>
+        <div className="flex items-center justify-between">
+          {tokenBalances && (
+            <div className="text-center flex-1">
+              <div className="text-xs text-muted-foreground mb-1">STT Balance</div>
+              <div className="text-3xl font-bold">
+                {tokenBalances.stt}
               </div>
             </div>
-            <div className="flex gap-4">
-              <div>
-                <div className="text-xs text-muted-foreground mb-1">SOMI</div>
-                <div className="text-sm font-semibold">
-                  {tokenBalances?.somi || "0.00"}
-                </div>
-              </div>
-              <div>
-                <div className="text-xs text-muted-foreground mb-1">STT</div>
-                <div className="text-sm font-semibold">
-                  {tokenBalances?.stt || "0.00"}
-                </div>
-              </div>
+          )}
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Wallet className="h-4 w-4" />
+            Your agent wallet
+          </CardTitle>
+        </div>
+      </CardHeader>
+      <CardContent className="pt-0">
+        {dbUser?.wallet_address && !newPrivateKey ? (
+          <div className="flex items-center justify-center min-h-[60px]">
+            <div className="flex items-center gap-2">
+              <span className="font-mono text-sm text-foreground">
+                {dbUser.wallet_address}
+              </span>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6"
+                onClick={copyAddress}
+                title="Copy address"
+              >
+                {copied ? (
+                  <Check className="h-3 w-3 text-green-500" />
+                ) : (
+                  <Copy className="h-3 w-3" />
+                )}
+              </Button>
             </div>
           </div>
         ) : (
@@ -207,31 +199,108 @@ export function AgentWallet() {
               No wallet configured
             </p>
             <div className="flex gap-2">
-              <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-                <DialogTrigger asChild>
-                  <Button size="sm">
-                    <Plus className="h-3 w-3 mr-1" />
-                    Create Wallet
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Create Agent Wallet</DialogTitle>
-                    <DialogDescription>
-                      A new wallet will be generated for your agent. Make sure to securely store your private key.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <DialogFooter>
-                    <Button
-                      variant="outline"
-                      onClick={() => setShowCreateDialog(false)}
-                    >
-                      Cancel
-                    </Button>
-                    <Button onClick={handleCreateWallet} disabled={isCreating}>
-                      {isCreating ? "Creating..." : "Create Wallet"}
-                    </Button>
-                  </DialogFooter>
+              <Button size="sm" onClick={() => setShowCreateDialog(true)}>
+                <Plus className="h-3 w-3 mr-1" />
+                Create Wallet
+              </Button>
+              <Dialog 
+                open={showCreateDialog || !!newPrivateKey} 
+                onOpenChange={(open) => {
+                  // NEVER close if private key is displayed - user must click Close button
+                  if (!open && newPrivateKey) {
+                    return
+                  }
+                  // Only allow closing if no private key is displayed
+                  if (open) {
+                    setShowCreateDialog(true)
+                  } else {
+                    setShowCreateDialog(false)
+                    setNewPrivateKey(null)
+                  }
+                }}
+              >
+                <DialogContent
+                  onEscapeKeyDown={(e) => {
+                    if (newPrivateKey) {
+                      e.preventDefault()
+                    }
+                  }}
+                  onPointerDownOutside={(e) => {
+                    if (newPrivateKey) {
+                      e.preventDefault()
+                    }
+                  }}
+                  onInteractOutside={(e) => {
+                    if (newPrivateKey) {
+                      e.preventDefault()
+                    }
+                  }}
+                >
+                  {newPrivateKey ? (
+                    <>
+                      <DialogHeader>
+                        <DialogTitle>Wallet Created Successfully</DialogTitle>
+                        <DialogDescription>
+                          Save your private key securely - you won't be able to see it again.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="space-y-2 py-4">
+                        <Label>Private Key</Label>
+                        <div className="flex items-center gap-2">
+                          <Input
+                            value={newPrivateKey}
+                            readOnly
+                            className="font-mono text-sm"
+                          />
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => {
+                              navigator.clipboard.writeText(newPrivateKey)
+                              setCopied(true)
+                              setTimeout(() => setCopied(false), 2000)
+                            }}
+                          >
+                            {copied ? (
+                              <Check className="h-4 w-4 text-green-500" />
+                            ) : (
+                              <Copy className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+                      <DialogFooter>
+                        <Button onClick={async () => {
+                          setNewPrivateKey(null)
+                          setShowCreateDialog(false)
+                          // Sync user after closing dialog
+                          await syncUser()
+                        }}>
+                          Close
+                        </Button>
+                      </DialogFooter>
+                    </>
+                  ) : (
+                    <>
+                      <DialogHeader>
+                        <DialogTitle>Create Agent Wallet</DialogTitle>
+                        <DialogDescription>
+                          A new wallet will be generated for your agent. Make sure to securely store your private key.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <DialogFooter>
+                        <Button
+                          variant="outline"
+                          onClick={() => setShowCreateDialog(false)}
+                        >
+                          Cancel
+                        </Button>
+                        <Button onClick={handleCreateWallet} disabled={isCreating}>
+                          {isCreating ? "Creating..." : "Create Wallet"}
+                        </Button>
+                      </DialogFooter>
+                    </>
+                  )}
                 </DialogContent>
               </Dialog>
 
