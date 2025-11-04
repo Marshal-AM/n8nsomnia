@@ -218,7 +218,7 @@ export function AgentWallet() {
         {dbUser?.wallet_address && !newPrivateKey ? (
           <div className="flex items-center justify-center -mt-4 gap-3">
             <div className="flex items-center gap-2">
-              <span className="font-mono text-sm text-foreground">
+              <span className="font-mono text-lg text-foreground">
                 {dbUser.wallet_address}
               </span>
               <Button

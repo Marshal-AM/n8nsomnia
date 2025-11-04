@@ -22,7 +22,7 @@ import ReactFlow, {
 import "reactflow/dist/style.css"
 import { toast } from "@/components/ui/use-toast"
 import { Button } from "@/components/ui/button"
-import { Save, Play, ArrowLeft } from "lucide-react"
+import { Save, ArrowLeft } from "lucide-react"
 import NodeLibrary from "./node-library"
 import NodeConfigPanel from "./node-config-panel"
 import CustomEdge from "./custom-edge"
@@ -43,6 +43,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
 
 const toolTypes = [
   "transfer",
@@ -88,9 +99,11 @@ export default function WorkflowBuilder({ agentId }: WorkflowBuilderProps) {
   const [reactFlowInstance, setReactFlowInstance] = useState<any>(null)
   const [isAIChatOpen, setIsAIChatOpen] = useState(false)
   const [showExitDialog, setShowExitDialog] = useState(false)
+  const [showSaveDialog, setShowSaveDialog] = useState(false)
   const [agentName, setAgentName] = useState("")
   const [agentDescription, setAgentDescription] = useState("")
   const [loadingAgent, setLoadingAgent] = useState(false)
+  const [saving, setSaving] = useState(false)
 
   const onConnect = useCallback(
     (params: Edge | Connection) => setEdges((eds) => addEdge({ ...params, type: "custom" }, eds)),
@@ -160,7 +173,7 @@ export default function WorkflowBuilder({ agentId }: WorkflowBuilderProps) {
     [setNodes],
   )
 
-  const saveWorkflow = async () => {
+  const handleSaveClick = () => {
     if (nodes.length === 0) {
       toast({
         title: "Nothing to save",
@@ -179,6 +192,11 @@ export default function WorkflowBuilder({ agentId }: WorkflowBuilderProps) {
       return
     }
 
+    // Show the save dialog
+    setShowSaveDialog(true)
+  }
+
+  const saveWorkflow = async () => {
     if (!agentName.trim()) {
       toast({
         title: "Agent name required",
@@ -188,6 +206,7 @@ export default function WorkflowBuilder({ agentId }: WorkflowBuilderProps) {
       return
     }
 
+    setSaving(true)
     try {
       const tools = workflowToTools(nodes, edges)
 
@@ -202,13 +221,23 @@ export default function WorkflowBuilder({ agentId }: WorkflowBuilderProps) {
           title: "Agent updated",
           description: "Your agent has been updated successfully",
         })
+        setShowSaveDialog(false)
       } else {
         // Create new agent
+        if (!user?.id) {
+          toast({
+            title: "Error",
+            description: "User not authenticated",
+            variant: "destructive",
+          })
+          return
+        }
         const agent = await createAgent(user.id, agentName, agentDescription || null, tools)
         toast({
           title: "Agent created",
           description: "Your agent has been created successfully",
         })
+        setShowSaveDialog(false)
         // Redirect to my-agents or stay on builder with the agent ID
         router.push(`/agent-builder?agent=${agent.id}`)
       }
@@ -219,34 +248,12 @@ export default function WorkflowBuilder({ agentId }: WorkflowBuilderProps) {
         description: error.message || "Failed to save agent",
         variant: "destructive",
       })
+    } finally {
+      setSaving(false)
     }
   }
 
 
-  const executeWorkflow = () => {
-    if (nodes.length === 0) {
-      toast({
-        title: "Nothing to execute",
-        description: "Add some tools to your workflow first",
-        variant: "destructive",
-      })
-      return
-    }
-
-    toast({
-      title: "Executing workflow",
-      description: "Your workflow is being executed (simulation only in this MVP)",
-    })
-
-    // In a real implementation, we would traverse the graph and execute each tool
-    // For the MVP, we'll just simulate execution with a success message
-    setTimeout(() => {
-      toast({
-        title: "Workflow executed",
-        description: "Your workflow has been executed successfully",
-      })
-    }, 2000)
-  }
 
   const handleBackClick = () => {
     const hasUnsavedChanges = nodes.length > 0 || edges.length > 0
@@ -288,11 +295,7 @@ export default function WorkflowBuilder({ agentId }: WorkflowBuilderProps) {
 
         setAgentName(agent.name)
         setAgentDescription(agent.description || "")
-        // Convert tools back to workflow format
-        // Note: This is a simplified version - you may want to enhance toolsToWorkflow
-        // For now, we'll just show the tools that exist
-        const tools = agent.tools || []
-        // You can enhance this to properly reconstruct the workflow
+        // TODO: Convert tools back to workflow format using toolsToWorkflow
         // For now, we'll keep the current workflow and just show the agent info
       }
     } catch (error) {
@@ -359,34 +362,10 @@ export default function WorkflowBuilder({ agentId }: WorkflowBuilderProps) {
                 </div>
               </Panel>
               <Panel position="top-right">
-                <div className="flex gap-2">
-                  <Button onClick={saveWorkflow} size="sm" variant="outline" disabled={loadingAgent}>
-                    <Save className="h-4 w-4 mr-2" />
-                    {agentId ? "Update Agent" : "Save Agent"}
-                  </Button>
-                  <Button onClick={executeWorkflow} size="sm" variant="default">
-                    <Play className="h-4 w-4 mr-2" />
-                    Execute
-                  </Button>
-                </div>
-              </Panel>
-              <Panel position="top-center">
-                <div className="flex gap-2 items-center bg-white/90 backdrop-blur-sm rounded-lg p-2 shadow-md">
-                  <input
-                    type="text"
-                    placeholder="Agent Name"
-                    value={agentName}
-                    onChange={(e) => setAgentName(e.target.value)}
-                    className="px-3 py-1.5 border rounded-md text-sm min-w-[200px]"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Description (optional)"
-                    value={agentDescription}
-                    onChange={(e) => setAgentDescription(e.target.value)}
-                    className="px-3 py-1.5 border rounded-md text-sm min-w-[250px]"
-                  />
-                </div>
+                <Button onClick={handleSaveClick} size="sm" variant="outline" disabled={loadingAgent}>
+                  <Save className="h-4 w-4 mr-2" />
+                  {agentId ? "Update Agent" : "Save Agent"}
+                </Button>
               </Panel>
             </ReactFlow>
           </ReactFlowProvider>
@@ -424,6 +403,51 @@ export default function WorkflowBuilder({ agentId }: WorkflowBuilderProps) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog open={showSaveDialog} onOpenChange={setShowSaveDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{agentId ? "Update Agent" : "Create Agent"}</DialogTitle>
+            <DialogDescription>
+              Enter the name and description for your agent. The workflow will be saved with all configured tools.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="agent-name">Agent Name *</Label>
+              <Input
+                id="agent-name"
+                placeholder="My Agent"
+                value={agentName}
+                onChange={(e) => setAgentName(e.target.value)}
+                autoFocus
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="agent-description">Description (optional)</Label>
+              <Textarea
+                id="agent-description"
+                placeholder="Describe what this agent does..."
+                value={agentDescription}
+                onChange={(e) => setAgentDescription(e.target.value)}
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowSaveDialog(false)}
+              disabled={saving}
+            >
+              Cancel
+            </Button>
+            <Button onClick={saveWorkflow} disabled={saving || !agentName.trim()}>
+              {saving ? "Saving..." : agentId ? "Update Agent" : "Create Agent"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

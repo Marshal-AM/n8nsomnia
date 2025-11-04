@@ -2,11 +2,12 @@ import type { Node, Edge } from 'reactflow'
 
 /**
  * Convert ReactFlow nodes and edges to the tools format expected by the database
- * Note: This captures the first edge from each node. If a tool has multiple next tools,
- * only the first one will be stored. The database schema supports one next_tool per tool.
+ * Tools are stored IN ORDER. Connected tools form a chain where each tool's next_tool
+ * points to the immediate next tool in the series.
+ * 
  * @param nodes - Array of workflow nodes
  * @param edges - Array of workflow edges
- * @returns Array of tools with next_tool relationships
+ * @returns Array of tools with next_tool relationships in order
  */
 export function workflowToTools(nodes: Node[], edges: Edge[]): Array<{ tool: string; next_tool: string | null }> {
   // Create a map of node IDs to their tool types
@@ -17,27 +18,71 @@ export function workflowToTools(nodes: Node[], edges: Edge[]): Array<{ tool: str
     }
   })
 
-  // Create a map of source node IDs to target node IDs (first edge only)
-  const nextTools = new Map<string, string>()
+  // Create a map of source node ID to target node ID (for edges)
+  const nodeToNextNode = new Map<string, string>()
   edges.forEach((edge) => {
-    const sourceType = nodeIdToType.get(edge.source)
-    const targetType = nodeIdToType.get(edge.target)
-    if (sourceType && targetType && !nextTools.has(sourceType)) {
-      // Only set if not already set (first edge wins)
-      nextTools.set(sourceType, targetType)
-    }
+    nodeToNextNode.set(edge.source, edge.target)
   })
 
-  // Create the tools array - include all unique tool types from nodes
-  const tools: Array<{ tool: string; next_tool: string | null }> = []
-  const processedTypes = new Set<string>()
+  // Find all starting nodes (nodes with no incoming edges)
+  const nodesWithIncoming = new Set<string>()
+  edges.forEach((edge) => {
+    nodesWithIncoming.add(edge.target)
+  })
 
+  const startingNodes = nodes.filter((node) => !nodesWithIncoming.has(node.id))
+
+  // Process each chain starting from nodes with no incoming edges
+  const tools: Array<{ tool: string; next_tool: string | null }> = []
+  const processedNodeIds = new Set<string>()
+
+  // Helper function to traverse a chain
+  const traverseChain = (nodeId: string): void => {
+    if (processedNodeIds.has(nodeId)) return
+
+    const nodeType = nodeIdToType.get(nodeId)
+    if (!nodeType) return
+
+    processedNodeIds.add(nodeId)
+
+    const nextNodeId = nodeToNextNode.get(nodeId)
+    if (nextNodeId) {
+      const nextNodeType = nodeIdToType.get(nextNodeId)
+      if (nextNodeType) {
+        // This tool is connected to the next one
+        tools.push({
+          tool: nodeType,
+          next_tool: nextNodeType,
+        })
+        // Continue traversing the chain
+        traverseChain(nextNodeId)
+      } else {
+        // Next node exists but has no type
+        tools.push({
+          tool: nodeType,
+          next_tool: null,
+        })
+      }
+    } else {
+      // No next node, this is the end of the chain
+      tools.push({
+        tool: nodeType,
+        next_tool: null,
+      })
+    }
+  }
+
+  // Process all chains starting from nodes with no incoming edges
+  startingNodes.forEach((node) => {
+    traverseChain(node.id)
+  })
+
+  // Handle any remaining nodes that weren't processed (isolated nodes without edges)
   nodes.forEach((node) => {
-    if (node.type && !processedTypes.has(node.type)) {
-      processedTypes.add(node.type)
+    if (!processedNodeIds.has(node.id) && node.type) {
       tools.push({
         tool: node.type,
-        next_tool: nextTools.get(node.type) || null,
+        next_tool: null,
       })
     }
   })
