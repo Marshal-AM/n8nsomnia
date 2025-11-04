@@ -75,24 +75,55 @@ export async function saveWalletToUser(
 }
 
 /**
- * Fetch token balances (placeholder - you'll need to implement actual token contract calls)
+ * Remove wallet from user's Supabase record
+ * @param userId - The user ID
+ */
+export async function removeWalletFromUser(userId: string): Promise<void> {
+  const { error } = await supabase
+    .from('users')
+    .update({
+      wallet_address: null,
+      private_key: null,
+    })
+    .eq('id', userId)
+
+  if (error) {
+    throw new Error(`Failed to remove wallet: ${error.message}`)
+  }
+}
+
+/**
+ * Fetch STT token balance (native token of Somnia testnet)
  * @param address - The wallet address
- * @returns Object with SOMI and STT balances
+ * @returns STT token balance as string
  */
 export async function getTokenBalances(address: string): Promise<{
-  somi: string
   stt: string
 }> {
-  // TODO: Implement actual token balance fetching
-  // This is a placeholder that returns zero balances
-  // You'll need to:
-  // 1. Get the token contract addresses for SOMI and STT
-  // 2. Call balanceOf on each contract
-  // 3. Format the results (considering decimals)
-  
-  return {
-    somi: '0.00',
-    stt: '0.00',
+  const SOMNIA_RPC_URL = 'https://dream-rpc.somnia.network'
+
+  try {
+    const provider = new ethers.JsonRpcProvider(SOMNIA_RPC_URL)
+    
+    // Get native STT balance (native token, not ERC-20)
+    const balance = await provider.getBalance(address)
+
+    // Format balance (STT uses 18 decimals like ETH)
+    const formattedBalance = ethers.formatEther(balance)
+    const numericBalance = parseFloat(formattedBalance)
+
+    // Format to 2 decimal places
+    const sttBalance = numericBalance.toFixed(2)
+
+    return {
+      stt: sttBalance,
+    }
+  } catch (error) {
+    console.error('Error fetching STT balance:', error)
+    // Return zero balance on error
+    return {
+      stt: '0.00',
+    }
   }
 }
 

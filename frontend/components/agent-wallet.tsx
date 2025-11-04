@@ -14,9 +14,19 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Wallet, Plus, Download, Copy, Check } from "lucide-react"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import { Wallet, Plus, Download, Copy, Check, Trash2 } from "lucide-react"
 import { useAuth } from "@/lib/auth"
-import { createWallet, getAddressFromPrivateKey, isValidPrivateKey, saveWalletToUser, getTokenBalances } from "@/lib/wallet"
+import { createWallet, getAddressFromPrivateKey, isValidPrivateKey, saveWalletToUser, getTokenBalances, removeWalletFromUser } from "@/lib/wallet"
 import { toast } from "@/components/ui/use-toast"
 import { useEffect } from "react"
 
@@ -29,7 +39,9 @@ export function AgentWallet() {
   const [isImporting, setIsImporting] = useState(false)
   const [copied, setCopied] = useState(false)
   const [newPrivateKey, setNewPrivateKey] = useState<string | null>(null)
-  const [tokenBalances, setTokenBalances] = useState<{ somi: string; stt: string } | null>(null)
+  const [tokenBalances, setTokenBalances] = useState<{ stt: string } | null>(null)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [isRemoving, setIsRemoving] = useState(false)
 
   useEffect(() => {
     if (dbUser?.wallet_address && !newPrivateKey) {
@@ -143,6 +155,37 @@ export function AgentWallet() {
     }
   }
 
+  const handleRemoveWallet = async () => {
+    if (!user?.id) {
+      toast({
+        title: "Error",
+        description: "User not authenticated",
+        variant: "destructive",
+      })
+      return
+    }
+
+    setIsRemoving(true)
+    try {
+      await removeWalletFromUser(user.id)
+      await syncUser()
+      setTokenBalances(null)
+      toast({
+        title: "Wallet removed",
+        description: "Your wallet has been removed successfully",
+      })
+      setShowDeleteDialog(false)
+    } catch (error: any) {
+      toast({
+        title: "Error removing wallet",
+        description: error.message || "Failed to remove wallet",
+        variant: "destructive",
+      })
+    } finally {
+      setIsRemoving(false)
+    }
+  }
+
   if (loading) {
     return (
       <Card className="w-full">
@@ -157,23 +200,23 @@ export function AgentWallet() {
     <Card className="w-full">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Wallet className="h-4 w-4" />
+            Your agent wallet
+          </CardTitle>
           {tokenBalances && (
-            <div className="text-center flex-1">
+            <div className="text-center">
               <div className="text-xs text-muted-foreground mb-1">STT Balance</div>
               <div className="text-3xl font-bold">
                 {tokenBalances.stt}
               </div>
             </div>
           )}
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Wallet className="h-4 w-4" />
-            Your agent wallet
-          </CardTitle>
         </div>
       </CardHeader>
-      <CardContent className="pt-0">
+      <CardContent className="pt-0 pb-6">
         {dbUser?.wallet_address && !newPrivateKey ? (
-          <div className="flex items-center justify-center min-h-[60px]">
+          <div className="flex items-center justify-center -mt-4 gap-3">
             <div className="flex items-center gap-2">
               <span className="font-mono text-sm text-foreground">
                 {dbUser.wallet_address}
@@ -192,6 +235,15 @@ export function AgentWallet() {
                 )}
               </Button>
             </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6 text-destructive hover:text-destructive"
+              onClick={() => setShowDeleteDialog(true)}
+              title="Remove wallet"
+            >
+              <Trash2 className="h-3 w-3" />
+            </Button>
           </div>
         ) : (
           <div className="flex items-center justify-between">
@@ -353,6 +405,27 @@ export function AgentWallet() {
           </div>
         )}
       </CardContent>
+
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove Wallet?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove your agent wallet? This will delete your wallet address and private key from your account. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleRemoveWallet}
+              disabled={isRemoving}
+              className="bg-destructive text-white hover:bg-destructive/90"
+            >
+              {isRemoving ? "Removing..." : "Remove Wallet"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   )
 }
