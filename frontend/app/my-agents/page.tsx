@@ -5,7 +5,7 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card"
-import { Bot, MessageCircle, Plus, LogOut, Loader2, MoreVertical, Download } from "lucide-react"
+import { Bot, MessageCircle, Plus, LogOut, Loader2, MoreVertical, Download, Copy, Check } from "lucide-react"
 import { useAuth } from "@/lib/auth"
 import { getAgentsByUserId, deleteAgent } from "@/lib/agents"
 import type { Agent } from "@/lib/supabase"
@@ -44,6 +44,7 @@ export default function MyAgents() {
   const [agentToDelete, setAgentToDelete] = useState<string | null>(null)
   const [exportDialogOpen, setExportDialogOpen] = useState(false)
   const [selectedAgentForExport, setSelectedAgentForExport] = useState<Agent | null>(null)
+  const [copiedItem, setCopiedItem] = useState<string | null>(null)
 
   useEffect(() => {
     if (ready && !authenticated) {
@@ -262,7 +263,7 @@ export default function MyAgents() {
       </AlertDialog>
 
       <Dialog open={exportDialogOpen} onOpenChange={setExportDialogOpen}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="!max-w-[95vw] !w-[95vw] max-h-[90vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           <DialogHeader>
             <DialogTitle>Export Agent: {selectedAgentForExport?.name}</DialogTitle>
             <DialogDescription>
@@ -273,8 +274,30 @@ export default function MyAgents() {
             {/* API Key */}
             <div className="space-y-2">
               <label className="text-sm font-semibold">API Key</label>
-              <div className="p-3 bg-muted rounded-md border">
-                <code className="text-sm font-mono break-all">{selectedAgentForExport?.api_key}</code>
+              <div className="relative p-3 bg-muted rounded-md border">
+                <code className="text-sm font-mono break-all pr-10">{selectedAgentForExport?.api_key}</code>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="absolute top-2 right-2 h-7 w-7"
+                  onClick={() => {
+                    if (selectedAgentForExport?.api_key) {
+                      navigator.clipboard.writeText(selectedAgentForExport.api_key)
+                      setCopiedItem("api_key")
+                      setTimeout(() => setCopiedItem(null), 2000)
+                      toast({
+                        title: "Copied",
+                        description: "API key copied to clipboard",
+                      })
+                    }
+                  }}
+                >
+                  {copiedItem === "api_key" ? (
+                    <Check className="h-3 w-3 text-green-500" />
+                  ) : (
+                    <Copy className="h-3 w-3" />
+                  )}
+                </Button>
               </div>
             </div>
 
@@ -297,7 +320,7 @@ export default function MyAgents() {
               <label className="text-sm font-semibold">cURL Example</label>
               <div className="relative">
                 <pre className="p-4 bg-muted rounded-md border overflow-x-auto text-xs">
-                  <code>{`curl -X POST ${typeof window !== 'undefined' ? window.location.origin : 'https://your-domain.com'}/api/agent/chat \\
+                  <code>{`curl -X POST https://somnia-agent-builder.vercel.app/api/agent/chat \\
   -H "Content-Type: application/json" \\
   -d '{
     "api_key": "${selectedAgentForExport?.api_key || 'YOUR_API_KEY'}",
@@ -309,21 +332,32 @@ export default function MyAgents() {
                   size="sm"
                   className="absolute top-2 right-2"
                   onClick={() => {
-                    const curlCommand = `curl -X POST ${typeof window !== 'undefined' ? window.location.origin : 'https://your-domain.com'}/api/agent/chat \\
+                    const curlCommand = `curl -X POST https://somnia-agent-builder.vercel.app/api/agent/chat \\
   -H "Content-Type: application/json" \\
   -d '{
     "api_key": "${selectedAgentForExport?.api_key || 'YOUR_API_KEY'}",
     "user_message": "your_message_here"
   }'`
                     navigator.clipboard.writeText(curlCommand)
+                    setCopiedItem("curl")
+                    setTimeout(() => setCopiedItem(null), 2000)
                     toast({
                       title: "Copied",
                       description: "cURL command copied to clipboard",
                     })
                   }}
                 >
-                  <Download className="h-4 w-4 mr-2" />
-                  Copy
+                  {copiedItem === "curl" ? (
+                    <>
+                      <Check className="h-4 w-4 mr-2 text-green-500" />
+                      Copied
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="h-4 w-4 mr-2" />
+                      Copy
+                    </>
+                  )}
                 </Button>
               </div>
             </div>
@@ -333,7 +367,7 @@ export default function MyAgents() {
               <label className="text-sm font-semibold">JavaScript Example</label>
               <div className="relative">
                 <pre className="p-4 bg-muted rounded-md border overflow-x-auto text-xs">
-                  <code>{`const response = await fetch('${typeof window !== 'undefined' ? window.location.origin : 'https://your-domain.com'}/api/agent/chat', {
+                  <code>{`const response = await fetch('https://somnia-agent-builder.vercel.app/api/agent/chat', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
@@ -352,7 +386,7 @@ console.log(data);`}</code>
                   size="sm"
                   className="absolute top-2 right-2"
                   onClick={() => {
-                    const jsCode = `const response = await fetch('${typeof window !== 'undefined' ? window.location.origin : 'https://your-domain.com'}/api/agent/chat', {
+                    const jsCode = `const response = await fetch('https://somnia-agent-builder.vercel.app/api/agent/chat', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
@@ -366,14 +400,25 @@ console.log(data);`}</code>
 const data = await response.json();
 console.log(data);`
                     navigator.clipboard.writeText(jsCode)
+                    setCopiedItem("javascript")
+                    setTimeout(() => setCopiedItem(null), 2000)
                     toast({
                       title: "Copied",
                       description: "JavaScript code copied to clipboard",
                     })
                   }}
                 >
-                  <Download className="h-4 w-4 mr-2" />
-                  Copy
+                  {copiedItem === "javascript" ? (
+                    <>
+                      <Check className="h-4 w-4 mr-2 text-green-500" />
+                      Copied
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="h-4 w-4 mr-2" />
+                      Copy
+                    </>
+                  )}
                 </Button>
               </div>
             </div>
