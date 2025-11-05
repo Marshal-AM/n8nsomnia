@@ -1162,14 +1162,6 @@ struct Deposit {
 - `getUserDeposits(address user)` - Get all deposit IDs for user
 - `getDepositInfo(uint256 depositId)` - Get deposit details
 
-**Yield Formula:**
-```
-yield = (amount * apy * timeInSeconds) / (10000 * 31536000)
-```
-Where:
-- `apy` is in basis points (500 = 5%)
-- `31536000` = seconds in a year
-
 **Security:**
 - Only depositor can withdraw their deposit
 - Validates deposit is active
