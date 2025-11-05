@@ -70,7 +70,7 @@ graph TB
         NFTFactory[NFTFactory Contract<br/>0x83B831848eE0A9a2574Cf62a13c23d8eDCa84E9F]
         DAOFactory[DAOFactory Contract<br/>0xc6D49E765576134495ee49e572d5cBCb83a330Dc]
         Airdrop[Airdrop Contract<br/>0x70F3147fa7971033312911a59579f18Ff0FE26F9]
-        YieldCalc[YieldCalculator Contract<br/>Configurable]
+        YieldCalc[YieldCalculator Contract<br/>0x9bb2363810156f7b32b255677e8C1852AC1F95E6]
         SwapRouter[Swap Router<br/>0x6aac14f090a35eea150705f72d90e4cdc4a49b2c]
         SomniaAPI[Somnia Subgraph API<br/>Token Balance Queries]
     end
@@ -279,6 +279,9 @@ Transfers native STT tokens or ERC-20 tokens from one wallet to another. Support
 - Uses standard ERC-20 interface: `transfer(address to, uint256 amount)`
 - No smart contract deployment needed (uses existing token contracts)
 
+**Example:**
+- [Transfer transaction](https://shannon-explorer.somnia.network/tx/0x0af995d10c82abe5a56f7356d51970fc576fa8a50825348357336f31527251a6)
+
 ---
 
 ### 2. Swap Tool
@@ -466,6 +469,9 @@ sequenceDiagram
     Backend-->>User: Token Address & Info
 ```
 
+**Example:**
+- [Deployed ERC-20 Test Token](https://shannon-explorer.somnia.network/token/0x93c343D5C94Eac8089F1963fA75b874Db2C9f6FB)
+
 ---
 
 ### 5. ERC-721 NFT Collection Deployment
@@ -560,6 +566,9 @@ sequenceDiagram
     Backend-->>User: Collection & NFT Info
 ```
 
+**Example:**
+- [NFT Collection](https://shannon-explorer.somnia.network/token/0x2Feaba0eD96df2190dF47b2427C880FF8056AB2a)
+
 ---
 
 ### 6. DAO Creation
@@ -637,6 +646,9 @@ sequenceDiagram
     DAO-->>Backend: DAO Information
     Backend-->>User: DAO Address & Info
 ```
+
+**Example:**
+- [Created DAO with members and votes](https://shannon-explorer.somnia.network/address/0x473CA2787ef8d3d57BB6930D3F6f2Ab91CCA2954?tab=index)
 
 ---
 
@@ -723,6 +735,9 @@ sequenceDiagram
     Backend-->>User: Transaction hash & results
 ```
 
+**Example:**
+- [Airdrop transaction to 3 addresses](https://shannon-explorer.somnia.network/tx/0x9a1e13e1b57df033f5cc1c5b99e18dd70d0e7287ca816c5d8b6ad9aeecddb2cf)
+
 ---
 
 ### 8. Token Price Fetching
@@ -795,7 +810,7 @@ Creates a deposit with yield prediction using any ERC-20 token. Calculates yield
    - Approves if needed: `approve(contractAddress, MaxUint256)`
 
 2. **Deposit Creation:**
-   - Contract Address: From `YIELD_CALCULATOR_ADDRESS` env var
+   - Contract Address: `0x9bb2363810156f7b32b255677e8C1852AC1F95E6` (or from `YIELD_CALCULATOR_ADDRESS` env var)
    - Calls `createDeposit(tokenAddress, amount, apy)`
    - APY converted to basis points: `apyPercent * 100`
    - Tokens transferred from user to contract
@@ -862,6 +877,9 @@ sequenceDiagram
     YieldCalculator-->>Backend: Yield amounts
     Backend-->>User: Deposit ID & Projections
 ```
+
+**Example:**
+- [Yield deposit transaction](https://shannon-explorer.somnia.network/tx/0xc742a02bc4765cf23fdab134c2b3a59bdd2b2f310c994c73aaab5080429c7ea0)
 
 ---
 
@@ -1118,6 +1136,8 @@ struct Proposal {
 
 **Location:** `backend/Yield/YieldCalculator.sol`
 
+**Address:** `0x9bb2363810156f7b32b255677e8C1852AC1F95E6`
+
 **Features:**
 - Multi-token support (any ERC-20)
 - APY-based yield calculation
@@ -1236,4 +1256,3 @@ MIT License - See LICENSE file for details
 ---
 
 **Built for the Somnia Testnet** 🌙
-
