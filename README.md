@@ -16,13 +16,13 @@ The platform supports 10 blockchain tools including **token transfers, swaps, to
 
 All smart contracts are deployed on the Somnia Shannon testnet. View them on the Explorer:
 
-| Contract | Address | Explorer Link |
-|----------|---------|---------------|
-| **TokenFactory** | `0x19Fae13F4C2fac0539b5E0baC8Ad1785f1C7dEE1` | [View on Explorer](https://shannon-explorer.somnia.network/address/0x19Fae13F4C2fac0539b5E0baC8Ad1785f1C7dEE1) |
-| **NFTFactory** | `0x83B831848eE0A9a2574Cf62a13c23d8eDCa84E9F` | [View on Explorer](https://shannon-explorer.somnia.network/address/0x83B831848eE0A9a2574Cf62a13c23d8eDCa84E9F) |
-| **DAOFactory** | `0xc6D49E765576134495ee49e572d5cBCb83a330Dc` | [View on Explorer](https://shannon-explorer.somnia.network/address/0xc6D49E765576134495ee49e572d5cBCb83a330Dc) |
-| **Airdrop** | `0x70F3147fa7971033312911a59579f18Ff0FE26F9` | [View on Explorer](https://shannon-explorer.somnia.network/address/0x70F3147fa7971033312911a59579f18Ff0FE26F9) |
-| **YieldCalculator** | `0x9bb2363810156f7b32b255677e8C1852AC1F95E6` | [View on Explorer](https://shannon-explorer.somnia.network/address/0x9bb2363810156f7b32b255677e8C1852AC1F95E6) |
+| Contract | Address | Explorer Link | Contract Code |
+|----------|---------|---------------|---------------|
+| **TokenFactory** | `0x19Fae13F4C2fac0539b5E0baC8Ad1785f1C7dEE1` | [View on Explorer](https://shannon-explorer.somnia.network/address/0x19Fae13F4C2fac0539b5E0baC8Ad1785f1C7dEE1) | [TokenFactory.sol](https://github.com/Marshal-AM/Somnia-No-Code-Agent-Builder/blob/main/backend/ERC-20/TokenFactory.sol) |
+| **NFTFactory** | `0x83B831848eE0A9a2574Cf62a13c23d8eDCa84E9F` | [View on Explorer](https://shannon-explorer.somnia.network/address/0x83B831848eE0A9a2574Cf62a13c23d8eDCa84E9F) | [NFTFactory.sol](https://github.com/Marshal-AM/Somnia-No-Code-Agent-Builder/blob/main/backend/ERC-721/NFTFactory.sol) |
+| **DAOFactory** | `0xc6D49E765576134495ee49e572d5cBCb83a330Dc` | [View on Explorer](https://shannon-explorer.somnia.network/address/0xc6D49E765576134495ee49e572d5cBCb83a330Dc) | [DAO.sol](https://github.com/Marshal-AM/Somnia-No-Code-Agent-Builder/blob/main/backend/DAO/DAO.sol) |
+| **Airdrop** | `0x70F3147fa7971033312911a59579f18Ff0FE26F9` | [View on Explorer](https://shannon-explorer.somnia.network/address/0x70F3147fa7971033312911a59579f18Ff0FE26F9) | [Airdrop.sol](https://github.com/Marshal-AM/Somnia-No-Code-Agent-Builder/blob/main/backend/Air%20Drop/Airdrop.sol) |
+| **YieldCalculator** | `0x9bb2363810156f7b32b255677e8C1852AC1F95E6` | [View on Explorer](https://shannon-explorer.somnia.network/address/0x9bb2363810156f7b32b255677e8C1852AC1F95E6) | [YieldCalculator.sol](https://github.com/Marshal-AM/Somnia-No-Code-Agent-Builder/blob/main/backend/Yield/YieldCalculator.sol) |
 
 ---
 
@@ -970,7 +970,7 @@ Fetches all ERC-20 token balances for a wallet address using Somnia's subgraph A
 
 ### TokenFactory & MyToken
 
-**Location:** [`backend/ERC-20/`](https://github.com/Marshal-AM/n8nsomnia/tree/main/backend/ERC-20)
+**Location:** [`backend/ERC-20/`](https://github.com/Marshal-AM/Somnia-No-Code-Agent-Builder/tree/main/backend/ERC-20)
 
 #### TokenFactory Contract
 
@@ -1014,7 +1014,7 @@ Fetches all ERC-20 token balances for a wallet address using Somnia's subgraph A
 
 ### NFTFactory & MyNFT
 
-**Location:** [`backend/ERC-721/`](https://github.com/Marshal-AM/n8nsomnia/tree/main/backend/ERC-721)
+**Location:** [`backend/ERC-721/`](https://github.com/Marshal-AM/Somnia-No-Code-Agent-Builder/tree/main/backend/ERC-721)
 
 #### NFTFactory Contract
 
@@ -1061,7 +1061,7 @@ Fetches all ERC-20 token balances for a wallet address using Somnia's subgraph A
 
 ### DAOFactory & DAO
 
-**Location:** [`backend/DAO/`](https://github.com/Marshal-AM/n8nsomnia/tree/main/backend/DAO)
+**Location:** [`backend/DAO/`](https://github.com/Marshal-AM/Somnia-No-Code-Agent-Builder/tree/main/backend/DAO)
 
 #### DAOFactory Contract
 
@@ -1134,7 +1134,7 @@ struct Proposal {
 
 ### Airdrop Contract
 
-**Location:** [`backend/Air Drop/Airdrop.sol`](https://github.com/Marshal-AM/n8nsomnia/blob/main/backend/Air%20Drop/Airdrop.sol)
+**Location:** [`backend/Air Drop/Airdrop.sol`](https://github.com/Marshal-AM/Somnia-No-Code-Agent-Builder/blob/main/backend/Air%20Drop/Airdrop.sol)
 
 **Address:** `0x70F3147fa7971033312911a59579f18Ff0FE26F9`
 
@@ -1164,7 +1164,7 @@ struct Proposal {
 
 ### YieldCalculator Contract
 
-**Location:** [`backend/Yield/YieldCalculator.sol`](https://github.com/Marshal-AM/n8nsomnia/blob/main/backend/Yield/YieldCalculator.sol)
+**Location:** [`backend/Yield/YieldCalculator.sol`](https://github.com/Marshal-AM/Somnia-No-Code-Agent-Builder/blob/main/backend/Yield/YieldCalculator.sol)
 
 **Address:** `0x9bb2363810156f7b32b255677e8C1852AC1F95E6`
 
