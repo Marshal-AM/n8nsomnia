@@ -1,4 +1,4 @@
-# n8nsomnia - No-Code Somnia Agent Builder Platform
+# Somnia No-Code Agent Builder Platform
 
 ## Introduction
 
