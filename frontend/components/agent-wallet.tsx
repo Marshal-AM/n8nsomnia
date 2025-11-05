@@ -206,6 +206,7 @@ export function AgentWalletModal({ open, onOpenChange }: AgentWalletModalProps) 
 
   // Get balance for display in button
   const displayBalance = tokenBalances?.stt || "0.00"
+  const hasWallet = !!dbUser?.wallet_address
 
   return (
     <>
@@ -216,16 +217,25 @@ export function AgentWalletModal({ open, onOpenChange }: AgentWalletModalProps) 
         onClick={() => onOpenChange(true)}
         className="gap-2"
       >
-        <div className="relative w-5 h-5 shrink-0">
-          <Image
-            src="/stt-logo.png"
-            alt="STT"
-            fill
-            className="object-contain"
-            unoptimized
-          />
-        </div>
-        <span className="font-semibold">{displayBalance} STT</span>
+        {hasWallet ? (
+          <>
+            <div className="relative w-5 h-5 shrink-0">
+              <Image
+                src="/stt-logo.png"
+                alt="STT"
+                fill
+                className="object-contain"
+                unoptimized
+              />
+            </div>
+            <span className="font-semibold">{displayBalance} STT</span>
+          </>
+        ) : (
+          <>
+            <Wallet className="h-5 w-5" />
+            <span className="font-semibold">Add Wallet</span>
+          </>
+        )}
       </Button>
 
       {/* Main Wallet Modal */}
