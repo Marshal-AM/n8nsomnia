@@ -785,7 +785,7 @@ sequenceDiagram
 **Endpoint:** `POST /token-price`
 
 **Description:**
-Fetches current cryptocurrency prices using OpenAI's web search capabilities with natural language queries.
+Fetches current cryptocurrency prices with natural language queries.
 
 **Request Body:**
 ```json
@@ -797,17 +797,11 @@ Fetches current cryptocurrency prices using OpenAI's web search capabilities wit
 **Implementation Details:**
 
 1. **Query Processing:**
-   - Uses OpenAI GPT-4o-search-preview model
    - System prompt instructs model to:
      - Parse natural language queries
      - Identify cryptocurrency symbols
      - Search for current prices
      - Return structured price information
-
-2. **OpenAI Integration:**
-   - Model: `gpt-4o-search-preview`
-   - Uses web search capabilities
-   - Searches reliable sources (CoinMarketCap, CoinGecko, Binance)
 
 **Response:**
 ```json
@@ -816,12 +810,8 @@ Fetches current cryptocurrency prices using OpenAI's web search capabilities wit
   "query": "bitcoin current price",
   "response": "As of November 2, 2025, Bitcoin (BTC) is trading at approximately $110,957 USD...",
   "timestamp": "2025-11-02T12:24:30.862Z",
-  "model_used": "gpt-4o-search-preview"
 }
 ```
-
-**Requirements:**
-- `OPENAI_API_KEY` must be set in environment variables
 
 ---
 
