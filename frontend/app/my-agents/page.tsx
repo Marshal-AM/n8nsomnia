@@ -109,12 +109,14 @@ export default function MyAgents() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen" style={{ backgroundImage: 'url(/hero-bg.svg)', backgroundSize: 'cover', backgroundPosition: 'center 80px', backgroundRepeat: 'no-repeat' }}>
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">My Agents</h1>
+            <h1 className="text-3xl font-bold tracking-tight">
+              <span className="bg-gradient-to-r from-[#AD00FF] to-[#333BFF] text-transparent bg-clip-text block md:inline">My Agents</span>
+            </h1>
             <p className="text-muted-foreground mt-2">
               Manage and interact with your Somnia agents
             </p>

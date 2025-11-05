@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -53,13 +53,7 @@ export function AgentWalletModal({ open, onOpenChange }: AgentWalletModalProps) 
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [isRemoving, setIsRemoving] = useState(false)
 
-  useEffect(() => {
-    if (dbUser?.wallet_address && !newPrivateKey && open) {
-      fetchBalances()
-    }
-  }, [dbUser?.wallet_address, newPrivateKey, open])
-
-  const fetchBalances = async () => {
+  const fetchBalances = useCallback(async () => {
     if (!dbUser?.wallet_address) return
     try {
       const balances = await getTokenBalances(dbUser.wallet_address)
@@ -67,7 +61,21 @@ export function AgentWalletModal({ open, onOpenChange }: AgentWalletModalProps) 
     } catch (error) {
       console.error("Error fetching balances:", error)
     }
-  }
+  }, [dbUser?.wallet_address])
+
+  // Fetch balances immediately when component mounts and user has a wallet
+  useEffect(() => {
+    if (dbUser?.wallet_address && !newPrivateKey) {
+      fetchBalances()
+    }
+  }, [dbUser?.wallet_address, newPrivateKey, fetchBalances])
+
+  // Also refresh balance when modal opens to ensure it's up-to-date
+  useEffect(() => {
+    if (open && dbUser?.wallet_address && !newPrivateKey) {
+      fetchBalances()
+    }
+  }, [open, dbUser?.wallet_address, newPrivateKey, fetchBalances])
 
   const handleCreateWallet = async () => {
     if (!user?.id) {
