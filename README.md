@@ -937,7 +937,7 @@ Fetches all ERC-20 token balances for a wallet address using Somnia's subgraph A
 
 ### TokenFactory & MyToken
 
-**Location:** `backend/ERC-20/`
+**Location:** [`backend/ERC-20/`](https://github.com/Marshal-AM/n8nsomnia/tree/main/backend/ERC-20)
 
 #### TokenFactory Contract
 
@@ -981,7 +981,7 @@ Fetches all ERC-20 token balances for a wallet address using Somnia's subgraph A
 
 ### NFTFactory & MyNFT
 
-**Location:** `backend/ERC-721/`
+**Location:** [`backend/ERC-721/`](https://github.com/Marshal-AM/n8nsomnia/tree/main/backend/ERC-721)
 
 #### NFTFactory Contract
 
@@ -1028,7 +1028,7 @@ Fetches all ERC-20 token balances for a wallet address using Somnia's subgraph A
 
 ### DAOFactory & DAO
 
-**Location:** `backend/DAO/`
+**Location:** [`backend/DAO/`](https://github.com/Marshal-AM/n8nsomnia/tree/main/backend/DAO)
 
 #### DAOFactory Contract
 
@@ -1101,7 +1101,7 @@ struct Proposal {
 
 ### Airdrop Contract
 
-**Location:** `backend/Air Drop/Airdrop.sol`
+**Location:** [`backend/Air Drop/Airdrop.sol`](https://github.com/Marshal-AM/n8nsomnia/blob/main/backend/Air%20Drop/Airdrop.sol)
 
 **Address:** `0x70F3147fa7971033312911a59579f18Ff0FE26F9`
 
@@ -1131,7 +1131,7 @@ struct Proposal {
 
 ### YieldCalculator Contract
 
-**Location:** `backend/Yield/YieldCalculator.sol`
+**Location:** [`backend/Yield/YieldCalculator.sol`](https://github.com/Marshal-AM/n8nsomnia/blob/main/backend/Yield/YieldCalculator.sol)
 
 **Address:** `0x9bb2363810156f7b32b255677e8C1852AC1F95E6`
 

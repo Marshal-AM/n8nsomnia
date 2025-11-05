@@ -9,7 +9,7 @@ import { Bot, MessageCircle, Plus, LogOut, Loader2, MoreVertical, Download, Copy
 import { useAuth } from "@/lib/auth"
 import { getAgentsByUserId, deleteAgent } from "@/lib/agents"
 import type { Agent } from "@/lib/supabase"
-import { AgentWallet } from "@/components/agent-wallet"
+import { AgentWalletModal } from "@/components/agent-wallet"
 import { toast } from "@/components/ui/use-toast"
 import {
   AlertDialog,
@@ -45,6 +45,7 @@ export default function MyAgents() {
   const [exportDialogOpen, setExportDialogOpen] = useState(false)
   const [selectedAgentForExport, setSelectedAgentForExport] = useState<Agent | null>(null)
   const [copiedItem, setCopiedItem] = useState<string | null>(null)
+  const [walletModalOpen, setWalletModalOpen] = useState(false)
 
   useEffect(() => {
     if (ready && !authenticated) {
@@ -125,16 +126,12 @@ export default function MyAgents() {
                 Create New Agent
               </Link>
             </Button>
+            <AgentWalletModal open={walletModalOpen} onOpenChange={setWalletModalOpen} />
             <Button onClick={logout} variant="outline" size="lg">
               <LogOut className="h-5 w-5 mr-2" />
               Logout
             </Button>
           </div>
-        </div>
-
-        {/* Agent Wallet Section */}
-        <div className="mb-8">
-          <AgentWallet />
         </div>
 
         {/* Agents Grid */}
