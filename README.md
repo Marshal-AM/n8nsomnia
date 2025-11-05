@@ -4,13 +4,6 @@
 
 **Somnia No-Code Agent Builder** is a no-code platform that enables users to build, deploy, and interact with AI-powered blockchain agents on the Somnia testnet. The platform provides a visual workflow builder interface where users can create sophisticated blockchain automation workflows without writing code.
 
-The platform consists of four main components:
-
-1. **Frontend** - Next.js-based visual workflow builder with drag-and-drop interface
-2. **Backend** - Express.js API server with blockchain interaction endpoints
-3. **Agent Service** - FastAPI service that orchestrates AI agents with tool calling capabilities
-4. **Workflow Builder** - AI-powered service that converts natural language to workflow structures
-
 The platform supports 10 blockchain tools including **token transfers, swaps, token/NFT deployment, DAO creation, airdrops, yield calculations, price fetching, and wallet analytics**. All tools interact with smart contracts deployed on the Somnia testnet.
 
 ### Deployed Tool Contracts
@@ -51,7 +44,7 @@ Getting started with Somnia No-Code Agent Builder is simple! Follow these steps:
 
 7. **Interact with it** in the UI or with curl requests by using your api key.
    
-   <img width="1470" height="919" alt="Screenshot 2025-11-05 at 4 00 16 PM" src="https://github.com/user-attachments/assets/709a69d3-0c6f-4a0b-b939-ac3e59efcc71" />
+   <img width="1470" height="918" alt="Screenshot 2025-11-05 at 7 11 58 PM" src="https://github.com/user-attachments/assets/bcba568e-381e-4f1b-bdf5-224b837d8b5b" />
 
    <img width="1385" height="483" alt="Screenshot 2025-11-05 at 4 00 37 PM" src="https://github.com/user-attachments/assets/6dc16a6d-cbf8-4baa-9028-ae1b2fdd14cc" />
 
